@@ -1,5 +1,5 @@
-require("dotenv").config();
-
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
@@ -23,10 +23,9 @@ app.use(cors()); // Enable CORS for your frontend URL
 
 // Connect to MongoDB using Mongoose
 const MONGO_URI = process.env.MONGO_URI;
+console.log("MONGO_URI:", process.env.MONGO_URI);
 
-mongoose.connect(MONGO_URI, {
-  ssl: process.env.NODE_ENV === "production", // Use SSL in production
-});
+mongoose.connect(MONGO_URI);
 mongoose.connection.on("connected", () => {
   console.log("Connected to MongoDB");
 });
