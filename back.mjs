@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
@@ -12,9 +14,7 @@ const PORT = process.env.PORT || 3001;
 app.use(bodyParser.json());
 
 // configure sendgrid
-sgMail.setApiKey(
-  "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"
-);
+sgMail.setApiKey(process.env.API_KEY);
 // Configure Cors
 
 // Whitelist Vercel domain
@@ -22,10 +22,7 @@ sgMail.setApiKey(
 app.use(cors()); // Enable CORS for your frontend URL
 
 // Connect to MongoDB using Mongoose
-const MONGO_URI =
-  process.env.NODE_ENV === "production"
-    ? "mongodb+srv://akindewahab:cMuD2QEEJW31G7D4@dips-cluster.1d9kz.mongodb.net/bookingDB?retryWrites=true&w=majority&ssl=true&appName=Dips-Cluster"
-    : "mongodb://localhost:27017/<database>";
+const MONGO_URI = process.env.MONGO_URI;
 
 mongoose.connect(MONGO_URI, {
   ssl: process.env.NODE_ENV === "production", // Use SSL in production
