@@ -71,8 +71,8 @@ app.post("/book", async (req, res) => {
 
     // Compose the email message with the booking details
     const msg = {
-      to: "Bimstudios@yahoo.com", // Your email address to receive the booking info
-      from: "snbadmus@gmail.com", // The sender email address
+      to: "info@makeupbybims.com", // Your email address to receive the booking info
+      from: "info@makeupbybims.com", // The sender email address
       subject: `New Booking: ${bookingData.service}`, // Email subject with the service name
       text: `
         You have received a new booking.
