@@ -141,11 +141,12 @@ app.get("/bookings/unavailable-times", async (req, res) => {
     // Initialize `timesToBlock` here
     let timesToBlock = [];
 
-    const bookedTimes = bookings.map((booking) => {
-      const bookingTime = moment(booking.date).format("HH:mm");
+    bookings.map((booking) => {
+      const bookingTime = moment(booking.date);
+      console.log("Booking time:", bookingTime);
 
       // Block the booked time and the next 2 hours (4 slots of 30 minutes each)
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i <= 4; i++) {
         timesToBlock.push(
           moment(bookingTime, "HH:mm")
             .add(i * 30, "minutes")
