@@ -18,9 +18,24 @@ sgMail.setApiKey(process.env.API_KEY);
 // Configure Cors
 
 // Whitelist Vercel domain
+const allowedOrigins = [
+  "https://www.makeupbybims.com",
+  "http://localhost:5173",
+]; // Add localhost for local testing
 
-app.use(cors()); // Enable CORS for your frontend URL
-
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true, // Allows cookies and credentials if needed
+  })
+);
 // Connect to MongoDB using Mongoose
 const MONGO_URI = process.env.MONGO_URI;
 console.log("MONGO_URI:", process.env.MONGO_URI);
