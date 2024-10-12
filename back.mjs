@@ -38,7 +38,6 @@ app.use(
 );
 // Connect to MongoDB using Mongoose
 const MONGO_URI = process.env.MONGO_URI;
-console.log("MONGO_URI:", process.env.MONGO_URI);
 
 mongoose.connect(MONGO_URI);
 mongoose.connection.on("connected", () => {
@@ -64,11 +63,11 @@ const bookingSchema = new mongoose.Schema({
 const Booking = mongoose.model("Booking", bookingSchema);
 
 // Endpoint to handle booking data and send an email
+// Endpoint to handle booking data and send an email
 app.post("/book", async (req, res) => {
   const bookingData = req.body;
-  console.log("Booking data received in backend:", bookingData);
 
-  // Combine date and time
+  // Combine date and time into a single field
   const bookingDateTime = moment
     .tz(
       `${bookingData.date} ${bookingData.time}`,
@@ -76,45 +75,50 @@ app.post("/book", async (req, res) => {
       "Africa/Lagos"
     )
     .toDate();
-  bookingData.date = bookingDateTime; // Save date and time as a single field
 
+  bookingData.date = bookingDateTime; // Update booking data with combined date and time
+
+  // Save booking data to the database
   const booking = new Booking(bookingData);
-
   try {
     await booking.save();
-
-    // Compose the email message with the booking details
-    const msg = {
-      to: "info@makeupbybims.com", // Your email address to receive the booking info
-      from: "info@makeupbybims.com", // The sender email address
-      subject: `New Booking: ${bookingData.service}`, // Email subject with the service name
-      text: `
-        You have received a new booking.
-
-        Service: ${bookingData.service}
-        Additional Service: ${bookingData.additionService || "None"}
-        Name: ${bookingData.name}
-        Email: ${bookingData.email}
-        Number: ${bookingData.number}
-        Address: ${bookingData.address}
-        Date: ${moment(bookingData.date).format("YYYY-MM-DD")}
-        Time: ${moment(bookingData.date).format("HH:mm")}
-        Message: ${bookingData.message || "No additional message."}
-      `,
-    };
-
-    // Send the email
-    await sgMail.send(msg);
-
-    res
-      .status(200)
-      .send({ message: "Booking data received and email sent successfully" });
+    console.log("Booking saved successfully:", booking);
   } catch (error) {
-    console.error("Error saving booking data or sending email:", error);
-    res.status(500).send({
-      error: "Failed to save booking data or send email",
-      details: error,
-    });
+    console.error("Error saving booking:", error);
+    return res.status(500).json({ message: "Failed to save booking data." });
+  }
+
+  // Prepare the email message with booking details
+  const msg = {
+    to: "makeupbybims@gmail.com",
+    from: "makeupbybims@gmail.com",
+    subject: `New Booking: ${bookingData.service}`,
+    text: `
+            You have received a new booking.
+            Service: ${bookingData.service}
+            Additional Service: ${bookingData.additionService || "None"}
+            Name: ${bookingData.name}
+            Email: ${bookingData.email}
+            Number: ${bookingData.number}
+            Address: ${bookingData.address}
+            Date: ${moment(bookingData.date).format("YYYY-MM-DD")}
+            Time: ${moment(bookingData.date).format("HH:mm")}
+            Message: ${bookingData.message || "No additional message."}
+        `,
+  };
+
+  // Send the email notification
+  try {
+    await sgMail.send(msg);
+    console.log("Email sent successfully");
+    return res
+      .status(200)
+      .json({ message: "Booking data received and email sent successfully" });
+  } catch (error) {
+    console.error("Error sending email:", error);
+    return res
+      .status(500)
+      .json({ message: "Failed to send booking confirmation email." });
   }
 });
 
