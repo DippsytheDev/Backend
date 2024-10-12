@@ -63,7 +63,6 @@ const bookingSchema = new mongoose.Schema({
 const Booking = mongoose.model("Booking", bookingSchema);
 
 // Endpoint to handle booking data and send an email
-// Endpoint to handle booking data and send an email
 app.post("/book", async (req, res) => {
   const bookingData = req.body;
 
@@ -72,7 +71,7 @@ app.post("/book", async (req, res) => {
     .tz(
       `${bookingData.date} ${bookingData.time}`,
       "YYYY-MM-DD HH:mm",
-      "Africa/Lagos"
+      "America/Edmonton"
     )
     .toDate();
 
@@ -101,8 +100,12 @@ app.post("/book", async (req, res) => {
             Email: ${bookingData.email}
             Number: ${bookingData.number}
             Address: ${bookingData.address}
-            Date: ${moment(bookingData.date).format("YYYY-MM-DD")}
-            Time: ${moment(bookingData.date).format("HH:mm")}
+            Date: ${moment(bookingData.date)
+              .tz("America/Edmonton")
+              .format("YYYY-MM-DD")}
+            Time: ${moment(bookingData.date)
+              .tz("America/Edmonton")
+              .format("HH:mm")}
             Message: ${bookingData.message || "No additional message."}
         `,
   };
