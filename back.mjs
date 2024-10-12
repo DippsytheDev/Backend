@@ -71,7 +71,7 @@ app.post("/book", async (req, res) => {
     .tz(
       `${bookingData.date} ${bookingData.time}`,
       "YYYY-MM-DD HH:mm",
-      "America/Edmonton"
+      "Africa/Lagos"
     )
     .toDate();
 
@@ -100,12 +100,8 @@ app.post("/book", async (req, res) => {
             Email: ${bookingData.email}
             Number: ${bookingData.number}
             Address: ${bookingData.address}
-            Date: ${moment(bookingData.date)
-              .tz("America/Edmonton")
-              .format("YYYY-MM-DD")}
-            Time: ${moment(bookingData.date)
-              .tz("America/Edmonton")
-              .format("HH:mm")}
+            Date: ${moment(bookingData.date).format("YYYY-MM-DD")}
+            Time: ${moment(bookingData.date).format("HH:mm")}
             Message: ${bookingData.message || "No additional message."}
         `,
   };
