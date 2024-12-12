@@ -68,11 +68,7 @@ app.post("/book", async (req, res) => {
 
   // Combine date and time into a single field
   const bookingDateTime = moment
-    .tz(
-      `${bookingData.date} ${bookingData.time}`,
-      "YYYY-MM-DD HH:mm",
-      "Africa/Lagos"
-    )
+    .tz(`${bookingData.date} ${bookingData.time}`, "YYYY-MM-DD HH:mm")
     .toDate();
 
   bookingData.date = bookingDateTime; // Update booking data with combined date and time
@@ -125,7 +121,8 @@ app.post("/book", async (req, res) => {
 app.get("/bookings/unavailable-times", async (req, res) => {
   const { date } = req.query;
   try {
-    const startOfDay = moment(date, "YYYY-MM-DD").startOf("day").toDate();
+    const startOfDay = moment(date, "YYYY-MM-DD").startOf("day");
+
     const endOfDay = moment(date, "YYYY-MM-DD").endOf("day").toDate();
 
     const bookings = await Booking.find({
