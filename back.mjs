@@ -121,8 +121,7 @@ app.post("/book", async (req, res) => {
 app.get("/bookings/unavailable-times", async (req, res) => {
   const { date } = req.query;
   try {
-    const startOfDay = moment(date, "YYYY-MM-DD").startOf("day");
-
+    const startOfDay = moment(date, "YYYY-MM-DD").startOf("day").toDate();
     const endOfDay = moment(date, "YYYY-MM-DD").endOf("day").toDate();
 
     const bookings = await Booking.find({
