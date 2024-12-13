@@ -68,7 +68,11 @@ app.post("/book", async (req, res) => {
 
   // Combine date and time into a single field
   const bookingDateTime = moment
-    .tz(`${bookingData.date} ${bookingData.time}`, "YYYY-MM-DD HH:mm")
+    .tz(
+      `${bookingData.date} ${bookingData.time}`,
+      "YYYY-MM-DD HH:mm",
+      "Africa/Lagos"
+    )
     .toDate();
 
   bookingData.date = bookingDateTime; // Update booking data with combined date and time
