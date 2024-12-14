@@ -6,8 +6,24 @@ import cors from "cors";
 import sgMail from "@sendgrid/mail";
 import mongoose from "mongoose";
 import moment from "moment-timezone"; // Import moment-timezone
+import swaggerUi from "swagger-ui-express";
+import swaggerJsDoc from "swagger-jsdoc";
+import swaggerSpec from "./swagger.js";
+
 
 const app = express();
+
+
+// Middleware to serve Swagger docs
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.listen(3001, () => {
+  console.log("Server running on http://localhost:3001");
+  console.log("Swagger Docs available at http://localhost:3001/api-docs");
+});
+
+
+
 const PORT = process.env.PORT || 3001;
 
 // Middleware
@@ -21,6 +37,7 @@ sgMail.setApiKey(process.env.API_KEY);
 const allowedOrigins = [
   "https://www.makeupbybims.com",
   "http://localhost:5173",
+  "http://localhost:3001"
 ]; // Add localhost for local testing
 
 app.use(
@@ -62,18 +79,38 @@ const bookingSchema = new mongoose.Schema({
 
 const Booking = mongoose.model("Booking", bookingSchema);
 
+console.log(bookingSchema);
 // Endpoint to handle booking data and send an email
+// app.post("/book", async (req, res) => {
+//   const bookingData = req.body;
+
+//   // Combine date and time into a single field
+//   const bookingDateTime = moment
+//     .tz(
+//       `${bookingData.date} ${bookingData.time}`,
+//       "YYYY-MM-DD HH:mm",
+//       "Africa/Lagos"
+//     )
+//     .toDate();
+
+// const moment = require("moment-timezone");
+
+
 app.post("/book", async (req, res) => {
+
+  debugger;
   const bookingData = req.body;
 
-  // Combine date and time into a single field
+  // Combine date and time into a single field and adjust to Calgary time
   const bookingDateTime = moment
     .tz(
       `${bookingData.date} ${bookingData.time}`,
       "YYYY-MM-DD HH:mm",
-      "Africa/Lagos"
+      "America/Edmonton" // Input timezone
     )
+    .tz("America/Edmonton", true) // Convert to Calgary time
     .toDate();
+
 
   bookingData.date = bookingDateTime; // Update booking data with combined date and time
 
@@ -171,7 +208,9 @@ app.get("/", (req, res) => {
   console.log("Received request to /");
   res.send("Backend is working!");
 });
+
+
 // Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+// });
