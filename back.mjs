@@ -10,9 +10,7 @@ import swaggerUi from "swagger-ui-express";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerSpec from "./swagger.js";
 
-
 const app = express();
-
 
 // Middleware to serve Swagger docs
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -22,23 +20,20 @@ app.listen(3001, () => {
   console.log("Swagger Docs available at http://localhost:3001/api-docs");
 });
 
-
-
 const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(bodyParser.json());
 
-// configure sendgrid
+// Configure SendGrid
 sgMail.setApiKey(process.env.API_KEY);
-// Configure Cors
 
-// Whitelist Vercel domain
+// Configure CORS
 const allowedOrigins = [
   "https://www.makeupbybims.com",
   "http://localhost:5173",
-  "http://localhost:3001"
-]; // Add localhost for local testing
+  "http://localhost:3001",
+];
 
 app.use(
   cors({
@@ -50,9 +45,10 @@ app.use(
       }
     },
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true, // Allows cookies and credentials if needed
+    credentials: true,
   })
 );
+
 // Connect to MongoDB using Mongoose
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -65,7 +61,7 @@ mongoose.connection.on("error", (err) => {
   console.error(`Failed to connect to MongoDB: ${err.message}`);
 });
 
-// Define your Mongoose schema and model here
+// Define Mongoose schema and model
 const bookingSchema = new mongoose.Schema({
   name: String,
   email: String,
@@ -79,34 +75,15 @@ const bookingSchema = new mongoose.Schema({
 
 const Booking = mongoose.model("Booking", bookingSchema);
 
-console.log(bookingSchema);
 // Endpoint to handle booking data and send an email
-// app.post("/book", async (req, res) => {
-//   const bookingData = req.body;
-
-//   // Combine date and time into a single field
-//   const bookingDateTime = moment
-//     .tz(
-//       `${bookingData.date} ${bookingData.time}`,
-//       "YYYY-MM-DD HH:mm",
-//       "Africa/Lagos"
-//     )
-//     .toDate();
-
-// const moment = require("moment-timezone");
-
-
 app.post("/book", async (req, res) => {
-
-  debugger;
   const bookingData = req.body;
 
-  // Combine date and time into a single field and adjust to Calgary time
-   // Combine date and time into a single field without any timezone conversion
-   const bookingDateTime = moment(`${bookingData.date} ${bookingData.time}`, "YYYY-MM-DD HH:mm").toDate();
-  //  const bookingDateTime = moment(`${bookingData.date} ${bookingData.time}`, "YYYY-MM-DD HH:mm")
-  //  .add(1, 'hours')  // Add 1 hour to the time
-  //  .toDate();
+  // Combine date and time into a single field without timezone conversion
+  const bookingDateTime = moment(
+    `${bookingData.date} ${bookingData.time}`,
+    "YYYY-MM-DD HH:mm"
+  ).toDate();
 
   bookingData.date = bookingDateTime; // Update booking data with combined date and time
 
@@ -154,7 +131,7 @@ app.post("/book", async (req, res) => {
   }
 });
 
-// Endpoint to fetch unavailable times // Endpoint to fetch unavailable times for a specific date
+// Endpoint to fetch unavailable times for a specific date
 app.get("/bookings/unavailable-times", async (req, res) => {
   const { date } = req.query;
   try {
@@ -170,27 +147,24 @@ app.get("/bookings/unavailable-times", async (req, res) => {
 
     console.log("Bookings found for the date:", bookings);
 
-    // Initialize `timesToBlock` here
-    let timesToBlock = [];
+    // Initialize unavailable times array
+    let unavailableTimes = [];
 
-    bookings.map((booking) => {
+    bookings.forEach((booking) => {
       const bookingTime = moment(booking.date);
-      console.log("Booking time:", bookingTime);
 
       // Block the booked time and the next 2 hours (4 slots of 30 minutes each)
-      for (let i = 0; i <= 4; i++) {
-        timesToBlock.push(
-          moment(bookingTime, "HH:mm")
-            .add(i * 30, "minutes")
-            .format("HH:mm")
+      for (let i = 0; i < 4; i++) {
+        unavailableTimes.push(
+          bookingTime.clone().add(i * 30, "minutes").format("HH:mm")
         );
       }
     });
 
     // Ensure unique times using a Set
-    const unavailableTimes = Array.from(new Set(timesToBlock));
+    unavailableTimes = Array.from(new Set(unavailableTimes));
 
-    console.log("Blocked times to send to frontend:", unavailableTimes);
+    console.log("Unavailable times:", unavailableTimes);
 
     res.status(200).json(unavailableTimes);
   } catch (error) {
@@ -200,13 +174,9 @@ app.get("/bookings/unavailable-times", async (req, res) => {
       .send({ error: "Failed to fetch unavailable times", details: error });
   }
 });
+
+// Health Check Endpoint
 app.get("/", (req, res) => {
   console.log("Received request to /");
   res.send("Backend is working!");
 });
-
-
-// Start the server
-// app.listen(PORT, () => {
-//   console.log(`Server is running on port ${PORT}`);
-// });
