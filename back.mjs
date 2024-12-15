@@ -65,6 +65,7 @@ const Booking = mongoose.model("Booking", bookingSchema);
 // Endpoint to handle booking data and send an email
 app.post("/book", async (req, res) => {
   const bookingData = req.body;
+  console.log("received booking data:", bookingData);
 
   // Combine date and time into a single field
   const bookingDateTime = moment
@@ -75,6 +76,9 @@ app.post("/book", async (req, res) => {
     )
     .utc()
     .toDate();
+  if (isNaN(bookingDateTime.getTime())) {
+    throw new Error("Invalid date or time format");
+  }
 
   bookingData.date = bookingDateTime; // Update booking data with combined date and time
 
@@ -84,8 +88,10 @@ app.post("/book", async (req, res) => {
     await booking.save();
     console.log("Booking saved successfully:", booking);
   } catch (error) {
-    console.error("Error saving booking:", error);
-    return res.status(500).json({ message: "Failed to save booking data." });
+    console.error("Error saving booking:", error.message, error.stack);
+    return res
+      .status(500)
+      .json({ message: "Failed to save booking data.", error: error.message });
   }
 
   // Prepare the email message with booking details
