@@ -133,18 +133,16 @@ app.get("/bookings/unavailable-times", async (req, res) => {
     const startOfDay = moment
       .tz(date, "YYYY-MM-DD", "America/Edmonton")
       .startOf("day")
-      .utc()
-      .toDate();
+      .utc();
     const endOfDay = moment
       .tz(date, "YYYY-MM-DD", "America/Edmonton")
       .endOf("day")
-      .utc()
-      .toDate();
+      .utc();
 
     const bookings = await Booking.find({
       date: {
-        $gte: startOfDay,
-        $lt: endOfDay,
+        $gte: startOfDay.toDate(),
+        $lt: endOfDay.toDate(),
       },
     });
 
