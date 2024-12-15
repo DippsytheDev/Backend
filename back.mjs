@@ -71,8 +71,9 @@ app.post("/book", async (req, res) => {
     .tz(
       `${bookingData.date} ${bookingData.time}`,
       "YYYY-MM-DD HH:mm",
-      "Africa/Lagos"
+      "America/Edmonton"
     )
+    .utc()
     .toDate();
 
   bookingData.date = bookingDateTime; // Update booking data with combined date and time
@@ -100,8 +101,12 @@ app.post("/book", async (req, res) => {
             Email: ${bookingData.email}
             Number: ${bookingData.number}
             Address: ${bookingData.address}
-            Date: ${moment(bookingData.date).format("YYYY-MM-DD")}
-            Time: ${moment(bookingData.date).format("HH:mm")}
+            Date: ${moment(bookingData.date)
+              .tz("America/Edmonton")
+              .format("YYYY-MM-DD")}
+            Time: ${moment(bookingData.date)
+              .tz("America/Edmonton")
+              .format("HH:mm")}
             Message: ${bookingData.message || "No additional message."}
         `,
   };
@@ -125,8 +130,16 @@ app.post("/book", async (req, res) => {
 app.get("/bookings/unavailable-times", async (req, res) => {
   const { date } = req.query;
   try {
-    const startOfDay = moment(date, "YYYY-MM-DD").startOf("day").toDate();
-    const endOfDay = moment(date, "YYYY-MM-DD").endOf("day").toDate();
+    const startOfDay = moment
+      .tz(date, "YYYY-MM-DD", "America/Edmonton")
+      .startOf("day")
+      .utc()
+      .toDate();
+    const endOfDay = moment
+      .tz(date, "YYYY-MM-DD", "America/Edmonton")
+      .endOf("day")
+      .utc()
+      .toDate();
 
     const bookings = await Booking.find({
       date: {
