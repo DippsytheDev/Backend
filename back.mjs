@@ -184,6 +184,12 @@ app.get("/bookings/unavailable-times", async (req, res) => {
       .send({ error: "Failed to fetch unavailable times", details: error });
   }
 });
+// Vercel Express Compatibility
+import { createServer } from "http";
+const server = createServer(app);
+export default function handler(req, res) {
+  server.emit("request", req, res);
+}
 app.get("/", (req, res) => {
   console.log("Received request to /");
   res.send("Backend is working!");
@@ -192,3 +198,4 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+app.get("/favicon.ico", (req, res) => res.status(204).end());
