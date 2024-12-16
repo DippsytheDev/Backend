@@ -80,14 +80,10 @@ app.post("/book", async (req, res) => {
   const bookingData = req.body;
 
   // Combine date and time into a single field without timezone conversion
-  const bookingDateTime = moment
-  .tz(
+  const bookingDateTime = moment(
     `${bookingData.date} ${bookingData.time}`,
-    "YYYY-MM-DD HH:mm",
-    "UTC" // Correct input timezone for Calgary (adjust this for the user's timezone if needed)
-  )
-  .tz("America/Edmonton", true) // Convert to Calgary time (considering MST/MDT)
-  .toDate();
+    "YYYY-MM-DD HH:mm"
+  ).toDate();
 
   bookingData.date = bookingDateTime; // Update booking data with combined date and time
 
