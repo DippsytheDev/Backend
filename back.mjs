@@ -85,10 +85,15 @@ app.post("/book", async (req, res) => {
     `${bookingData.date} ${bookingData.time}`,
     "YYYY-MM-DD HH:mm",
     "UTC" // Correct input timezone for Calgary (adjust this for the user's timezone if needed)
+    //console.log()
   )
+  
   .tz("America/Edmonton", true) // Convert to Calgary time (considering MST/MDT)
   .toDate();
 
+  console.log(bookingData.date)
+
+  console.log(bookingDateTime)
   bookingData.date = bookingDateTime; // Update booking data with combined date and time
 
   // Save booking data to the database
@@ -155,12 +160,17 @@ app.get("/bookings/unavailable-times", async (req, res) => {
     let unavailableTimes = [];
 
     bookings.forEach((booking) => {
-      const bookingTime = moment(booking.date);
+      const bookingTimeUtc = moment(booking.date).utc(); // Parse UTC time
+      console.log("Booking time in UTC:", bookingTimeUtc);
+
+      // Convert the booking time to America/Edmonton timezone
+      const bookingTimeEdmonton = bookingTimeUtc.tz("America/Edmonton");
+      console.log("Booking time in America/Edmonton:", bookingTimeEdmonton);
 
       // Block the booked time and the next 2 hours (4 slots of 30 minutes each)
       for (let i = 0; i < 4; i++) {
         unavailableTimes.push(
-          bookingTime.clone().add(i * 30, "minutes").format("HH:mm")
+          bookingTimeEdmonton.clone().add(i * 30, "minutes").format("HH:mm")
         );
       }
     });
@@ -178,6 +188,8 @@ app.get("/bookings/unavailable-times", async (req, res) => {
       .send({ error: "Failed to fetch unavailable times", details: error });
   }
 });
+
+
 
 // Health Check Endpoint
 app.get("/", (req, res) => {
