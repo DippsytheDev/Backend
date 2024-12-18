@@ -1,3 +1,5 @@
 .vercel
 .env
 .env
+node_modules
+request.http

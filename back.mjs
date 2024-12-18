@@ -158,13 +158,17 @@ app.get("/bookings/unavailable-times", async (req, res) => {
     let timesToBlock = [];
 
     bookings.map((booking) => {
-      const bookingTime = moment(booking.date);
-      console.log("Booking time:", bookingTime);
+      const bookingTimeUtc = moment(booking.date).utc(); // Parse UTC time
+      console.log("Booking time in UTC:", bookingTimeUtc);
+
+      // Convert the booking time to America/Edmonton timezone
+      const bookingTimeEdmonton = bookingTimeUtc.tz("America/Edmonton");
+      console.log("Booking time in America/Edmonton:", bookingTimeEdmonton);
 
       // Block the booked time and the next 2 hours (4 slots of 30 minutes each)
       for (let i = 0; i <= 4; i++) {
         timesToBlock.push(
-          moment(bookingTime, "HH:mm")
+          moment(bookingTimeEdmonton, "HH:mm")
             .add(i * 30, "minutes")
             .format("HH:mm")
         );
