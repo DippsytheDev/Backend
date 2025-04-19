@@ -74,10 +74,11 @@ app.post("/book", async (req, res) => {
       "YYYY-MM-DD HH:mm",
       "America/Edmonton"
     )
-    .utc()
+    /* .utc() */
+    .startOf("minute") // Set to the start of the minute
     .toDate();
   if (isNaN(bookingDateTime.getTime())) {
-    throw new Error("Invalid date or time format");
+    return res.status(400).json({ message: "Invalid date or time format" });
   }
 
   bookingData.date = bookingDateTime; // Update booking data with combined date and time
@@ -139,11 +140,11 @@ app.get("/bookings/unavailable-times", async (req, res) => {
     const startOfDay = moment
       .tz(date, "YYYY-MM-DD", "America/Edmonton")
       .startOf("day")
-      .utc();
+      /* .utc(); */
     const endOfDay = moment
       .tz(date, "YYYY-MM-DD", "America/Edmonton")
       .endOf("day")
-      .utc();
+      /* .utc(); */
 
     const bookings = await Booking.find({
       date: {
@@ -168,9 +169,7 @@ app.get("/bookings/unavailable-times", async (req, res) => {
       // Block the booked time and the next 2 hours (4 slots of 30 minutes each)
       for (let i = 0; i <= 4; i++) {
         timesToBlock.push(
-          moment(bookingTimeEdmonton, "HH:mm")
-            .add(i * 30, "minutes")
-            .format("HH:mm")
+          bookingTimeEdmonton.clone().add(i * 30, "minutes").format("HH:mm")
         );
       }
     });
