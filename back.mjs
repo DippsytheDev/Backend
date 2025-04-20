@@ -158,7 +158,7 @@ app.get("/bookings/unavailable-times", async (req, res) => {
     // Initialize `timesToBlock` here
     let timesToBlock = [];
 
-    bookings.map((booking) => {
+ /*    bookings.map((booking) => {
       const bookingTimeUtc = moment(booking.date).utc(); // Parse UTC time
       console.log("Booking time in UTC:", bookingTimeUtc);
 
@@ -171,6 +171,15 @@ app.get("/bookings/unavailable-times", async (req, res) => {
         timesToBlock.push(
           bookingTimeEdmonton.clone().add(i * 30, "minutes").format("HH:mm")
         );
+      }
+    }); */
+    bookings.forEach((booking) => {
+      const bookingTimeEdmonton = moment(booking.date).tz("America/Edmonton");
+    
+      // Block the booked time and the next 2 hours (4 slots of 30 minutes each)
+      for (let i = 0; i < 4; i++) { // use < 4 to block 2 hours (4 x 30 mins)
+        const blockedTime = moment(bookingTimeEdmonton).add(i * 30, "minutes").format("HH:mm");
+        timesToBlock.push(blockedTime);
       }
     });
 
