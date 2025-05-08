@@ -3,9 +3,9 @@ dotenv.config();
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
-import sgMail from "@sendgrid/mail";
 import mongoose from "mongoose";
-import moment from "moment-timezone"; // Import moment-timezone
+import moment from "moment-timezone";
+import nodemailer from "nodemailer";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -13,9 +13,16 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(bodyParser.json());
 
-// configure sendgrid
+/* // configure sendgrid
 sgMail.setApiKey(process.env.API_KEY);
-// Configure Cors
+ */
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS,
+  },
+});
 
 // Whitelist Vercel domain
 const allowedOrigins = [
@@ -96,7 +103,7 @@ app.post("/book", async (req, res) => {
   }
 
   // Prepare the email message with booking details
-  const msg = {
+  const mailOptions = {
     to: "makeupbybims@gmail.com",
     from: "makeupbybims@gmail.com",
     subject: `New Booking: ${bookingData.service}`,
@@ -120,7 +127,7 @@ app.post("/book", async (req, res) => {
 
   // Send the email notification
   try {
-    await sgMail.send(msg);
+    await transporter.sendMail(mailOptions);
     console.log("Email sent successfully");
     return res
       .status(200)
@@ -163,7 +170,7 @@ app.get("/bookings/unavailable-times", async (req, res) => {
       const bookingTimeEdmonton = moment(booking.date).tz("America/Edmonton");
     
       // Block the booked time and the next 2 hours (4 slots of 30 minutes each)
-      for (let i = 0; i <= 4; i++) { // use < 4 to block 2 hours (4 x 30 mins)
+      for (let i = 0; i < 4; i++) { // use < 4 to block 2 hours (4 x 30 mins)
         const blockedTime = moment(bookingTimeEdmonton).clone().add(i * 30, "minutes").format("HH:mm");
         timesToBlock.push(blockedTime);
       }
@@ -176,7 +183,7 @@ app.get("/bookings/unavailable-times", async (req, res) => {
 
     res.status(200).json(unavailableTimes);
   } catch (error) {
-    console.error("Error fetching bookings:", error);
+    console.error("Error fetching bookings:", error);hi
     res
       .status(500)
       .send({ error: "Failed to fetch unavailable times", details: error });
