@@ -140,15 +140,7 @@ app.post("/book", async (req, res) => {
       .json({ message: "Failed to send booking confirmation email." });
   }
 });
-app.get("/bookings", async (req, res) => {
-  try {
-    const bookings = await Booking.find(); // Fetch all bookings from the database
-    res.status(200).json(bookings); // Send the bookings as a JSON response
-  } catch (error) {
-    console.error("Error fetching bookings:", error);
-    res.status(500).json({ message: "Failed to fetch bookings", error: error.message });
-  }
-});
+
 
 // Endpoint to fetch unavailable times // Endpoint to fetch unavailable times for a specific date
 app.get("/bookings/unavailable-times", async (req, res) => {
