@@ -83,7 +83,7 @@ app.post("/book", async (req, res) => {
     )
     /* .utc() */
     .startOf("minute") // Set to the start of the minute
-    .toDate();i
+    .toDate();
   if (isNaN(bookingDateTime.getTime())) {
     return res.status(400).json({ message: "Invalid date or time format" });
   }
