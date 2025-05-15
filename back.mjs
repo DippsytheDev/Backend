@@ -172,7 +172,7 @@ app.get("/bookings/unavailable-times", async (req, res) => {
       const bookingTimeEdmonton = moment(booking.date).tz("America/Edmonton");
     
       // Block the booked time and the next 2 hours (4 slots of 30 minutes each)
-      for (let i = 0; i < 4; i++) { // use < 4 to block 2 hours (4 x 30 mins)
+      for (let i = 0; i < 5; i++) { // use < 4 to block 2 hours (4 x 30 mins)
         const blockedTime = moment(bookingTimeEdmonton).clone().add(i * 30, "minutes").format("HH:mm");
         timesToBlock.push(blockedTime);
       }
