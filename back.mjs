@@ -145,31 +145,15 @@ app.post("/book", async (req, res) => {
 // Endpoint to fetch unavailable times // Endpoint to fetch unavailable times for a specific date
 app.get("/bookings/unavailable-times", async (req, res) => {
   const { date } = req.query;
-
-  // Define the rest period
-  const restStart = moment().startOf("day"); // Start of today
-  const restEnd = moment("2023-05-31").endOf("day"); // End of May 31st
-
   try {
-    const requestedDate = moment.tz(date, "YYYY-MM-DD", "America/Edmonton");
-
-    // Check if the requested date falls within the rest period
-    if (requestedDate.isBetween(restStart, restEnd, null, "[]")) {
-      // Block all times for this date
-      const unavailableTimes = [];
-      for (let hour = 0; hour < 24; hour++) {
-        for (let minute = 0; minute < 60; minute += 30) {
-          unavailableTimes.push(
-            moment({ hour, minute }).format("HH:mm")
-          );
-        }
-      }
-      return res.status(200).json(unavailableTimes);
-    }
-
-    // If the date is outside the rest period, fetch unavailable times from the database
-    const startOfDay = requestedDate.startOf("day");
-    const endOfDay = requestedDate.endOf("day");
+    const startOfDay = moment
+      .tz(date, "YYYY-MM-DD", "America/Edmonton")
+      .startOf("day")
+      /* .utc(); */
+    const endOfDay = moment
+      .tz(date, "YYYY-MM-DD", "America/Edmonton")
+      .endOf("day")
+      /* .utc(); */
 
     const bookings = await Booking.find({
       date: {
@@ -180,24 +164,28 @@ app.get("/bookings/unavailable-times", async (req, res) => {
 
     console.log("Bookings found for the date:", bookings);
 
+    // Initialize `timesToBlock` here
     let timesToBlock = [];
+
+
     bookings.forEach((booking) => {
       const bookingTimeEdmonton = moment(booking.date).tz("America/Edmonton");
-      for (let i = 0; i < 5; i++) {
-        const blockedTime = moment(bookingTimeEdmonton)
-          .clone()
-          .add(i * 30, "minutes")
-          .format("HH:mm");
+    
+      // Block the booked time and the next 2 hours (4 slots of 30 minutes each)
+      for (let i = 0; i < 5; i++) { // use < 4 to block 2 hours (4 x 30 mins)
+        const blockedTime = moment(bookingTimeEdmonton).clone().add(i * 30, "minutes").format("HH:mm");
         timesToBlock.push(blockedTime);
       }
     });
 
+    // Ensure unique times using a Set
     const unavailableTimes = Array.from(new Set(timesToBlock));
+
     console.log("Blocked times to send to frontend:", unavailableTimes);
 
     res.status(200).json(unavailableTimes);
   } catch (error) {
-    console.error("Error fetching bookings:", error);
+    console.error("Error fetching bookings:", error);hi
     res
       .status(500)
       .send({ error: "Failed to fetch unavailable times", details: error });
