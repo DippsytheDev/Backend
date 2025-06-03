@@ -13,9 +13,7 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(bodyParser.json());
 
-/* // configure sendgrid
-sgMail.setApiKey(process.env.API_KEY);
- */
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -161,6 +159,7 @@ app.get("/bookings/unavailable-times", async (req, res) => {
         $lt: endOfDay.toDate(),
       },
     });
+    kii
 
     console.log("Bookings found for the date:", bookings);
 
