@@ -159,7 +159,7 @@ app.get("/bookings/unavailable-times", async (req, res) => {
         $lt: endOfDay.toDate(),
       },
     });
-    kii
+    
 
     console.log("Bookings found for the date:", bookings);
 
